@@ -1,20 +1,66 @@
 # williepb — 가족 자산 관리 서비스
 
 가족 구성원 전원의 자산(부동산·주식·연금·현금·암호화폐·금·자동차·실물)과 부채(대출·카드)를
-하나의 뷰로 통합하고, 매일 자동 갱신되는 시세와 포트폴리오·세무 인사이트를 제공하는 프로젝트입니다.
+하나의 뷰로 통합하고, 매일 자동 갱신되는 시세와 포트폴리오·세무 인사이트를 제공합니다.
 
-현재 단계: **설계 초안(Draft)**.
+현재 단계: **MVP 프로토타입** — FastAPI 백엔드 + Next.js 프론트엔드.
 
-## 문서
-- [초안 설계서 v0.1](./docs/INITIAL_DESIGN.md) — 서비스 범위, 아키텍처, 도메인 모델, 외부 연동 전략, 세무 엔진, 로드맵.
+## 구성
 
-## 주요 자산 카테고리 (요약)
-- 부동산 — 국토부 실거래가 + 부동산원 지수 (KB시세는 대안 검토)
-- 금융자산 — 마이데이터 / 오픈뱅킹 / 증권사 OpenAPI / CSV
-- 암호화폐 — 업비트 등 거래소 OpenAPI
-- 금 — KRX 금시장 + 금 ETF 합산
-- 자동차 — 수동 입력 + 감가상각 (시세 API는 제휴 필요)
-- 카드/대출/기타 실물 — 마이데이터 + 수동 입력
+| 디렉토리 | 역할 |
+|---|---|
+| [`backend/`](./backend/README.md) | FastAPI, SQLAlchemy, 어댑터 레지스트리, 일 배치 CLI |
+| [`frontend/`](./frontend/README.md) | Next.js(App Router) 대시보드 — SSR 로 백엔드 호출 |
+| [`docs/`](./docs/INITIAL_DESIGN.md) | 초안 설계서 (v0.1) |
+
+## MVP 연동 범위
+
+- 은행: **KB국민은행**, **우리은행** (CSV 업로드 → 잔액 등록)
+- 증권사: **키움증권**, **NH투자증권** (CSV 업로드 → 보유종목 등록)
+- 암호화폐: **업비트** Open API (잔고 + 시세)
+- 시장시세: **KRX** (pykrx), **KRX 금시장**
+- 부동산: **부동산원 R-ONE 지수** + **국토부 실거래가** 보조
+- 환율: **한국은행 ECOS**
+
+신규 기관 추가는 `app/integrations/` 에 어댑터 모듈 하나 + `bootstrap.py`
+한 줄 등록으로 끝나도록 Protocol 기반으로 설계했습니다.
+
+## 로컬에서 한 번에 띄우기
+
+```bash
+# 백엔드
+cd backend
+pip install -e ".[dev]"
+williepb init-db
+python -m scripts.seed            # 샘플 가구 + 시세 시드
+uvicorn app.main:app --reload     # http://localhost:8000/docs
+
+# 프론트엔드 (다른 터미널)
+cd frontend
+npm install
+NEXT_PUBLIC_API_BASE=http://localhost:8000 npm run dev  # http://localhost:3000/?household=1
+```
+
+또는 Postgres 포함 컨테이너로:
+```bash
+docker compose up --build
+```
+
+## 일 배치
+
+```bash
+williepb sync                     # 오늘자 시세 동기화 + 가구별 스냅샷 저장
+```
+
+cron 등록 예시는 `backend/README.md` 참고.
 
 ## 다음 단계
-문서 `docs/INITIAL_DESIGN.md` 의 §12 "다음 액션 아이템" 참고.
+
+- 증권사 REST OpenAPI 연동 (본인계좌 자동 잔고 조회)
+- 마이데이터 중계사 파트너 PoC
+- 세무 엔진(보유세·양도세·금융소득종합과세)
+- 인증(NextAuth + JWT) 및 가족 초대 플로우
+- 차트 UI (Recharts/ECharts)
+- Alembic 마이그레이션 도입
+
+자세한 백로그는 [`docs/INITIAL_DESIGN.md`](./docs/INITIAL_DESIGN.md) §11 로드맵 참고.
