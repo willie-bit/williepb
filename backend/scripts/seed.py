@@ -11,6 +11,7 @@ from decimal import Decimal
 
 from sqlalchemy import select
 
+from app.core.security import hash_password
 from app.db.session import SessionLocal, init_db
 from app.models import (
     Account,
@@ -25,6 +26,7 @@ from app.models import (
     PriceQuote,
     RateType,
     Role,
+    User,
     ValuationSource,
 )
 
@@ -40,6 +42,9 @@ def main() -> None:
 
         dad = _upsert_member(db, hh.id, "아빠", Role.OWNER)
         mom = _upsert_member(db, hh.id, "엄마", Role.CO_ADMIN)
+
+        # Demo login: dad@example.com / password1234
+        _upsert_user(db, "dad@example.com", "password1234", dad.id)
 
         kb = _upsert_account(db, hh, dad, "kb_kookmin", "KB 급여통장")
         kiwoom = _upsert_account(db, hh, dad, "kiwoom", "키움 위탁")
@@ -124,6 +129,16 @@ def main() -> None:
 
         db.commit()
         print(f"✓ seeded household id={hh.id} with 6 assets + 1 liability")
+        print("  login: dad@example.com / password1234")
+
+
+def _upsert_user(db, email: str, password: str, member_id: int) -> User:
+    u = db.scalar(select(User).where(User.email == email))
+    if u is None:
+        u = User(email=email, password_hash=hash_password(password), member_id=member_id)
+        db.add(u)
+        db.flush()
+    return u
 
 
 def _upsert_member(db, household_id: int, name: str, role: Role) -> Member:

@@ -1,11 +1,14 @@
 :root {
   --bg: #0f1115;
   --panel: #171a21;
+  --panel-2: #1d212a;
   --border: #242832;
   --fg: #e6e8ec;
   --muted: #8b93a7;
   --accent: #6ea8ff;
+  --accent-2: #4fd18b;
   --danger: #ff6b6b;
+  --gold: #d4af37;
 }
 
 * { box-sizing: border-box; }
@@ -20,15 +23,49 @@ html, body {
   font-size: 14px;
 }
 
-main { padding: 32px; max-width: 1100px; margin: 0 auto; }
-h1 { font-size: 22px; margin: 0 0 24px; }
-h2 { font-size: 15px; margin: 0 0 12px; color: var(--muted); font-weight: 500; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
 
-.grid {
+h1 { font-size: 22px; margin: 0 0 20px; }
+h2 { font-size: 15px; margin: 0 0 12px; color: var(--muted); font-weight: 500; }
+h3 { font-size: 13px; margin: 0 0 8px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* Layout */
+.app {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  grid-template-columns: 220px 1fr;
+  min-height: 100vh;
 }
+.sidebar {
+  border-right: 1px solid var(--border);
+  padding: 20px 14px;
+  background: var(--panel);
+}
+.sidebar .brand {
+  font-weight: 700; font-size: 16px; margin-bottom: 20px;
+  letter-spacing: -0.01em;
+}
+.sidebar nav a {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: var(--fg);
+  margin-bottom: 2px;
+}
+.sidebar nav a.active,
+.sidebar nav a:hover { background: var(--panel-2); text-decoration: none; }
+.sidebar .user-box {
+  margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border);
+  color: var(--muted); font-size: 12px;
+}
+.sidebar .user-box strong { color: var(--fg); display: block; margin-bottom: 4px; }
+
+.content { padding: 28px 36px; max-width: 1200px; width: 100%; }
+
+/* Cards */
+.grid { display: grid; gap: 16px; }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
 
 .card {
   background: var(--panel);
@@ -37,23 +74,81 @@ h2 { font-size: 15px; margin: 0 0 12px; color: var(--muted); font-weight: 500; }
   padding: 18px;
 }
 
-.kpi-value { font-size: 22px; font-weight: 600; }
+.kpi-value { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .kpi-sub { color: var(--muted); font-size: 12px; margin-top: 4px; }
 
+/* Tables */
 table { width: 100%; border-collapse: collapse; }
 th, td {
   text-align: left;
-  padding: 8px 6px;
+  padding: 10px 8px;
   border-bottom: 1px solid var(--border);
   font-variant-numeric: tabular-nums;
 }
 th { color: var(--muted); font-weight: 500; font-size: 12px; }
 td.num, th.num { text-align: right; }
+tr:last-child td { border-bottom: none; }
 
-.bar {
-  height: 8px; background: var(--border); border-radius: 4px; overflow: hidden;
+/* Buttons + forms */
+button, .btn {
+  background: var(--accent); color: #0f1115;
+  border: none; border-radius: 6px;
+  padding: 8px 14px; font-weight: 600; cursor: pointer;
+  font-size: 13px;
 }
+button:hover { filter: brightness(1.05); }
+button.ghost, .btn.ghost {
+  background: transparent; color: var(--fg); border: 1px solid var(--border);
+}
+button.danger, .btn.danger {
+  background: var(--danger); color: #fff;
+}
+
+label { display: block; color: var(--muted); font-size: 12px; margin-bottom: 4px; }
+input, select, textarea {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--panel-2);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+input:focus, select:focus, textarea:focus { outline: 1px solid var(--accent); }
+.form-row { margin-bottom: 12px; }
+.form-row.inline { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.error { color: var(--danger); font-size: 12px; margin-top: 6px; }
+
+.auth-page {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+}
+.auth-card h1 { font-size: 20px; }
+.auth-card p.sub { color: var(--muted); margin: -8px 0 20px; font-size: 13px; }
+
+.bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
 .bar > span { display: block; height: 100%; background: var(--accent); }
 
-.positive { color: #4fd18b; }
+.positive { color: var(--accent-2); }
 .negative { color: var(--danger); }
+.muted { color: var(--muted); }
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 11px;
+  border: 1px solid var(--border);
+}
+
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }

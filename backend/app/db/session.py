@@ -33,6 +33,7 @@ def init_db() -> None:
         price_quote,
         snapshot,
         transaction,
+        user,
     )
 
     Base.metadata.create_all(bind=engine)

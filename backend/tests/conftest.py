@@ -3,6 +3,7 @@ from collections.abc import Iterator
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.pool import StaticPool
 
 # Point the app to an in-memory SQLite BEFORE the models import.
 import os
@@ -19,6 +20,7 @@ from app.models import (  # noqa: E402,F401 — register metadata
     price_quote,
     snapshot,
     transaction,
+    user,
 )
 
 
@@ -28,6 +30,7 @@ def engine():
         "sqlite+pysqlite:///:memory:",
         future=True,
         connect_args={"check_same_thread": False},
+        poolclass=StaticPool,  # share one connection so :memory: DB is visible to all sessions
     )
     Base.metadata.create_all(bind=eng)
     yield eng

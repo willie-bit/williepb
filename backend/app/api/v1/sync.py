@@ -4,8 +4,9 @@ from fastapi import APIRouter, Body, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.api.deps import AuthContext, get_auth_context
 from app.db.session import get_db
-from app.models import Household
+from app.models import Account
 from app.services.snapshot import write_snapshot
 from app.services.sync import sync_account, sync_prices
 
@@ -19,22 +20,15 @@ class SyncResult(BaseModel):
     snapshot_written: bool
 
 
-@router.post("/household/{household_id}", response_model=SyncResult)
+@router.post("/household", response_model=SyncResult)
 def sync_household(
-    household_id: int,
     on_date: date | None = None,
+    ctx: AuthContext = Depends(get_auth_context),
     db: Session = Depends(get_db),
 ) -> SyncResult:
-    """Fetch market prices for this household's symbols, then write a snapshot.
-
-    Account-level credential sync is triggered separately via `/sync/account/{id}`
-    because credentials are caller-supplied and may vary per request.
-    """
-    if db.get(Household, household_id) is None:
-        raise HTTPException(status_code=404, detail="Household not found")
     target = on_date or date.today()
-    report = sync_prices(db, target, household_id=household_id)
-    write_snapshot(db, household_id, target)
+    report = sync_prices(db, target, household_id=ctx.household_id)
+    write_snapshot(db, ctx.household_id, target)
     db.commit()
     return SyncResult(
         prices_written=report.prices_written,
@@ -48,14 +42,12 @@ def sync_household(
 def sync_one_account(
     account_id: int,
     credentials: dict = Body(default_factory=dict),
+    ctx: AuthContext = Depends(get_auth_context),
     db: Session = Depends(get_db),
 ) -> SyncResult:
-    """Trigger account-level holding sync.
-
-    `credentials` shape depends on the institution adapter. Examples:
-      - CSV-based: {"csv_path": "/data/imports/kiwoom/2026-04-20.csv"}
-      - Upbit:    {"access_key": "...", "secret_key": "..."}
-    """
+    account = db.get(Account, account_id)
+    if account is None or account.household_id != ctx.household_id:
+        raise HTTPException(status_code=404, detail="Account not found")
     report = sync_account(db, account_id, credentials)
     db.commit()
     return SyncResult(

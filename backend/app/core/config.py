@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     nh_app_key: str = Field(default="", validation_alias="NH_APP_KEY")
     nh_app_secret: str = Field(default="", validation_alias="NH_APP_SECRET")
 
+    jwt_secret: str = Field(default="", validation_alias="WILLIEPB_JWT_SECRET")
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:

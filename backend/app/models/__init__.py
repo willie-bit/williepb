@@ -6,6 +6,7 @@ from app.models.member import Member, Role
 from app.models.price_quote import PriceQuote
 from app.models.snapshot import HouseholdDailySnapshot
 from app.models.transaction import CashFlowEvent, CashFlowKind, Transaction, TxSide
+from app.models.user import User
 
 __all__ = [
     "Household",
@@ -24,4 +25,5 @@ __all__ = [
     "TxSide",
     "CashFlowEvent",
     "CashFlowKind",
+    "User",
 ]
