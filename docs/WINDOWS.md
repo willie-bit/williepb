@@ -85,6 +85,31 @@ VS Code 에서 **``Ctrl+` ``** (백틱) 으로 터미널 2개를 열고:
 
 ## 자주 묻는 에러
 
+### 로그인 시 `fetch failed` 가 뜸
+99% 백엔드와 통신 실패입니다. 다음 순서로 확인:
+
+1. **백엔드가 켜져 있는지 확인**
+   ```powershell
+   curl http://127.0.0.1:8000/health
+   # 또는 브라우저에서 http://127.0.0.1:8000/docs 접속
+   ```
+   응답이 없으면 `.\scripts\run-backend.ps1` 부터 실행.
+
+2. **`localhost` 가 IPv6 으로 해석되는 문제 (Windows + Node 18+ 의 흔한 원인)**
+   - 백엔드는 IPv4 (`127.0.0.1`) 에서 듣는데 Node 가 `localhost` 를 IPv6 (`::1`) 로 시도해서 거부됨.
+   - 해결: `NEXT_PUBLIC_API_BASE` 를 `http://127.0.0.1:8000` 으로 명시.
+     `scripts\run-frontend.ps1` 은 이미 이렇게 설정됨. 직접 띄울 때는:
+     ```powershell
+     $env:NEXT_PUBLIC_API_BASE = "http://127.0.0.1:8000"
+     npm run dev
+     ```
+
+3. **방화벽이 Node/Python 을 차단**: 첫 실행 시 Windows Defender 팝업이 뜨면 모두 허용.
+
+4. **Next.js 가 환경변수를 못 읽음**: `npm run dev` 실행 직전에 같은 PowerShell 세션에서
+   `$env:NEXT_PUBLIC_API_BASE` 를 설정해야 합니다. 새 터미널에서 띄우면 다시 설정 필요.
+
+
 ### `ExecutionPolicy` / `스크립트 로딩이 사용 안 함`
 ```powershell
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force

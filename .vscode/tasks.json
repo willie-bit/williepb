@@ -73,14 +73,14 @@
         "command": "bash",
         "args": [
           "-c",
-          "cd frontend && NEXT_PUBLIC_API_BASE=http://localhost:8000 npm run dev"
+          "cd frontend && NEXT_PUBLIC_API_BASE=http://127.0.0.1:8000 npm run dev"
         ]
       },
       "osx": {
         "command": "bash",
         "args": [
           "-c",
-          "cd frontend && NEXT_PUBLIC_API_BASE=http://localhost:8000 npm run dev"
+          "cd frontend && NEXT_PUBLIC_API_BASE=http://127.0.0.1:8000 npm run dev"
         ]
       },
       "isBackground": true,

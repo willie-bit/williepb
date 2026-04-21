@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { apiBase } from "./api";
+import { apiBase, networkErrorMessage } from "./api";
 import type { CurrentUser } from "./types";
 
 const COOKIE_NAME = "williepb_token";
@@ -11,19 +11,24 @@ const COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7d, matches backend JWT TTL
 type TokenResponse = { access_token: string };
 
 async function post<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${apiBase()}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-    cache: "no-store",
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${apiBase()}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+  } catch (err) {
+    throw new Error(networkErrorMessage(err));
+  }
   const text = await res.text();
   const data = text ? JSON.parse(text) : null;
   if (!res.ok) {
     const msg =
       data && typeof data === "object" && "detail" in data
         ? String((data as { detail: unknown }).detail)
-        : "요청이 실패했습니다";
+        : `요청이 실패했습니다 (HTTP ${res.status})`;
     throw new Error(msg);
   }
   return data as T;
